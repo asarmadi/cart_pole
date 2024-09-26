@@ -1,8 +1,10 @@
 import numpy as np
+import scipy.optimize as opt
 
 class CartPole:
-    def __init__(self, config):
+    def __init__(self, config, xf):
         self.config = config
+        self.xf     = xf
 
     # Dynamics of the cart-pole system
     def dynamics(self, state, action):
@@ -27,3 +29,31 @@ class CartPole:
         k3 = self.dynamics(state + 0.5 * k2 * self.config.dt, action)
         k4 = self.dynamics(state + k3 * self.config.dt, action)
         return state + (k1 + 2*k2 + 2*k3 + k4) * self.config.dt / 6
+
+    def cost(self, u, *args):
+        x0 = args[0]
+        cost_val = 0
+        for i in range(0,self.horizon):
+            
+            cost_val += ( np.linalg.norm(x0-self.xf)**2 + u[i]**2 )
+            x0 = self.step(x0,u[i])
+
+        return cost_val
+
+    def init_controller(self, xf, horizon):
+        self.horizon = horizon
+        self.xf  = xf
+        self.umin = [-20.]
+        self.umax = [20.]
+
+    def controller(self, x0):
+        
+        bounds = ((self.umin[0], self.umax[0]))
+
+        initial_guess = np.zeros(self.horizon)
+
+        U = opt.minimize(self.cost, initial_guess, args=x0, method='SLSQP',
+                         options={'maxiter': 200, 'disp': True})
+        U = U.x
+        
+        return U[0]
