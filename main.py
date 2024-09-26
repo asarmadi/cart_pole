@@ -3,18 +3,24 @@ from utils.config import Config
 from utils.system import CartPole
 from utils.visualization import CartPoleVisualizer
 
+from scipy.optimize import minimize
+
 
 # Initialize state and storage
-state = np.array([0, 0, np.pi+0.1, 0])  # [x, x_dot, theta, theta_dot]
+x0          = np.array([0, 0, np.pi+0.1, 0])  # [x, x_dot, theta, theta_dot]
+xf          = np.array([0, 0, np.pi, 0]) 
+mpc_horizon = 100
+
 history = []
 config = Config()
-system = CartPole(config)
+system = CartPole(config, xf)
+system.init_controller(xf, mpc_horizon)
 
 # Simulate the dynamics
 for t in np.arange(0, config.T, config.dt):
-    action = 0  # no control input for simplicity
-    state = system.step(state, action)
-    history.append(state)
+    action = system.controller(x0)
+    x0 = system.step(x0, action)
+    history.append(x0)
 
 history = np.array(history)
 
