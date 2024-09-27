@@ -7,3 +7,4 @@ class Config:
         self.l = 1.0  # length of the pole, in meters
         self.dt = 0.02  # time step, in seconds
         self.T = 20  # total time, in seconds
+        self.mpc_horizon = 100 # Horizon lenght in time step
