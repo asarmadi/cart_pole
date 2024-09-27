@@ -38,6 +38,6 @@ class CartPoleVisualizer:
         ani = animation.FuncAnimation(self.fig, self.update, frames=len(self.history), init_func=self.init, blit=True, interval=self.config.dt*1000)
         
         # Uncomment the line below to save the animation
-        # ani.save('cart_pole_animation.mp4', writer='ffmpeg')
+        ani.save('./out/cart_pole_animation.gif',writer='pillow')
         
         plt.show()
