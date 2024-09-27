@@ -53,7 +53,7 @@ class CartPole:
         initial_guess = np.zeros(self.horizon)
 
         U = opt.minimize(self.cost, initial_guess, args=x0, method='SLSQP',
-                         options={'maxiter': 200, 'disp': True})
+                         options={'maxiter': 200, 'disp': False})
         U = U.x
         
         return U[0]
