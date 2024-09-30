@@ -1,12 +1,11 @@
 import numpy as np
 import scipy.optimize as opt
 
-class CartPole:
-    def __init__(self, config, xf):
+class BaseSystem:
+    def __init__(self, config):
         self.config = config
-        self.xf     = xf
 
-    # Dynamics of the cart-pole system
+        # Dynamics of the cart-pole system
     def dynamics(self, state, action):
         x, x_dot, theta, theta_dot = state
         sin_theta = np.sin(theta)
@@ -29,6 +28,12 @@ class CartPole:
         k3 = self.dynamics(state + 0.5 * k2 * self.config.dt, action)
         k4 = self.dynamics(state + k3 * self.config.dt, action)
         return state + (k1 + 2*k2 + 2*k3 + k4) * self.config.dt / 6
+
+class CartPole(BaseSystem):
+    def __init__(self, config, xf):
+        super().__init__(config)
+        self.config = config
+        self.xf     = xf
 
     def cost(self, u, *args):
         x0 = args[0]
