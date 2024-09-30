@@ -1,6 +1,7 @@
 import numpy as np
 from utils.config import Config
 from utils.system import CartPole
+from utils.system_casadi import CartPoleCasadi
 from utils.visualization import CartPoleVisualizer
 
 from scipy.optimize import minimize
@@ -11,11 +12,11 @@ from tqdm import tqdm
 x0          = np.array([0, 0, 0, 0])  # [x, x_dot, theta, theta_dot]
 xf          = np.array([0, 0, np.pi, 0]) 
 
-
 history = []
 config = Config()
-system = CartPole(config, xf)
-system.init_controller(xf, config.mpc_horizon)
+system = CartPoleCasadi(config, xf)
+#system = CartPole(config, xf)
+#system.init_controller(xf, config.mpc_horizon)
 
 # Simulate the dynamics
 for t in tqdm(np.arange(0, config.T, config.dt)):
