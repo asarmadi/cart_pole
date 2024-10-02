@@ -35,8 +35,9 @@ class CartPoleVisualizer:
 
     def gen_animation(self):
         # Create animation
-        ani = animation.FuncAnimation(self.fig, self.update, frames=len(self.history), init_func=self.init, interval=self.config.dt*1000)
-        
+        ani = animation.FuncAnimation(self.fig, self.update, frames=len(self.history), interval=self.config.dt*1000)
+
+        gif_writer = animation.ImageMagickWriter(fps=20)
         # Uncomment the line below to save the animation
         ani.save('./out/cart_pole_animation.gif',writer='pillow')
         
