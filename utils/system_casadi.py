@@ -18,7 +18,17 @@ class CartPoleCasadi(BaseSystem):
         self.n_states = 4
         self.n_inputs = 1
         
+    def cal_energy(self):
+        x           = self.states[:,self.index_x]
+        x_dot       = self.states[:,self.index_x_dot]
+        theta       = self.states[:,self.index_theta]
+        theta_dot   = self.states[:,self.index_theta_dot]
 
+        pot = -self.config.m_pole*self.config.g*self.config.l*casadi.cos(theta)
+        kin =  0.5*(self.config.m_cart+self.config.m_pole)*x_dot**2
+        kin += self.config.m_pole*x_dot*theta_dot*self.config.l*casadi.cos(theta)
+        kin += 0.5*self.config.J*theta_dot**2
+        return pot, kin
 
     def dynamics_diff(self, x_, u):
         x           = x_[:,self.index_x]
@@ -66,14 +76,14 @@ class CartPoleCasadi(BaseSystem):
         lower_bounds['states'][0, self.index_theta_dot]   = x0[self.index_theta_dot]
         upper_bounds['states'][0, self.index_theta_dot]   = x0[self.index_theta_dot]
         ## Final state
-        lower_bounds['states'][-1,self.index_x]           = self.xf[self.index_x]
-        upper_bounds['states'][-1,self.index_x]           = self.xf[self.index_x]
-        lower_bounds['states'][-1,self.index_x_dot]       = self.xf[self.index_x_dot]
-        upper_bounds['states'][-1,self.index_x_dot]       = self.xf[self.index_x_dot]
-        lower_bounds['states'][-1,self.index_theta]       = self.xf[self.index_theta]
-        upper_bounds['states'][-1,self.index_theta]       = self.xf[self.index_theta]
-        lower_bounds['states'][-1,self.index_theta_dot]   = self.xf[self.index_theta_dot]
-        upper_bounds['states'][-1,self.index_theta_dot]   = self.xf[self.index_theta_dot]
+        #lower_bounds['states'][-1,self.index_x]           = self.xf[self.index_x]
+        #upper_bounds['states'][-1,self.index_x]           = self.xf[self.index_x]
+        #lower_bounds['states'][-1,self.index_x_dot]       = self.xf[self.index_x_dot]
+        #upper_bounds['states'][-1,self.index_x_dot]       = self.xf[self.index_x_dot]
+        #lower_bounds['states'][-1,self.index_theta]       = self.xf[self.index_theta]
+        #upper_bounds['states'][-1,self.index_theta]       = self.xf[self.index_theta]
+        #lower_bounds['states'][-1,self.index_theta_dot]   = self.xf[self.index_theta_dot]
+        #upper_bounds['states'][-1,self.index_theta_dot]   = self.xf[self.index_theta_dot]
         
         #self.states[0,:]=SX(x0)
         X0 = self.states[0:self.config.mpc_horizon-1,:]
@@ -86,12 +96,15 @@ class CartPoleCasadi(BaseSystem):
         defect = X0 + self.config.dt *(K1+2*K2+2*K3+K4)/6.0 - X1
         defect = casadi.reshape(defect, -1, 1)
         ## Optimization objective
-        objective = casadi.sum1(casadi.sum2(self.inputs**2))
-        objective += casadi.sum2(casadi.sumsqr((self.states-np.tile(self.xf,(self.config.mpc_horizon,1)))**2))
+        #objective = casadi.sum1(casadi.sum2(self.inputs**2))
+        #objective = casadi.sum1(casadi.sqrt(casadi.sum2((self.states-np.tile(self.xf,(self.config.mpc_horizon,1)))**2)))
+        potential_eng, kinetic_eng = self.cal_energy()
+        
+        objective = casadi.sum1(kinetic_eng-potential_eng)
         opts = {'ipopt.print_level':0, 'print_time':0}
         solver = casadi.nlpsol('solver', 'ipopt', {'x':self.variables_flat, 'f':objective, 'g':defect},opts)
         
-        result = solver(x0=0.0, lbg=0.0, ubg=0.0,
+        result = solver(x0=1.0, lbg=0.0, ubg=0.0,
                 lbx=self.pack_variables_fn(**lower_bounds)['flat'],
                 ubx=self.pack_variables_fn(**upper_bounds)['flat'])
         results = self.unpack_variables_fn(flat=result['x'])
