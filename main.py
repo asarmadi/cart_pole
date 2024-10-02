@@ -12,7 +12,8 @@ from tqdm import tqdm
 x0          = np.array([0, 0, 0, 0])  # [x, x_dot, theta, theta_dot]
 xf          = np.array([0, 0, np.pi, 0]) 
 
-history = []
+states  = []
+actions = []
 config = Config()
 system = CartPoleCasadi(config, xf)
 #system = CartPole(config, xf)
@@ -22,10 +23,12 @@ system = CartPoleCasadi(config, xf)
 for t in tqdm(np.arange(0, config.T, config.dt)):
     action = system.controller(x0)
     x0 = system.step(x0, action)
-    history.append(x0)
+    states.append(x0)
+    actions.append(action)
 
-history = np.array(history)
+states = np.array(states)
 
-visualize_obj = CartPoleVisualizer(history, config)
+visualize_obj = CartPoleVisualizer(states, config)
 visualize_obj.gen_animation()
+visualize_obj.plot(states, actions)
 
