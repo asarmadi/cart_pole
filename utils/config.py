@@ -6,5 +6,5 @@ class Config:
         self.m_pole = 0.1  # mass of the pole, in kg
         self.l = 1.0  # length of the pole, in meters
         self.dt = 0.02  # time step, in seconds
-        self.T = 20  # total time, in seconds
+        self.T = 10  # total time, in seconds
         self.mpc_horizon = 100 # Horizon lenght in time step
