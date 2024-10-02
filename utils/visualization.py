@@ -35,9 +35,17 @@ class CartPoleVisualizer:
 
     def gen_animation(self):
         # Create animation
-        ani = animation.FuncAnimation(self.fig, self.update, frames=len(self.history), init_func=self.init, blit=True, interval=self.config.dt*1000)
+        ani = animation.FuncAnimation(self.fig, self.update, frames=len(self.history), init_func=self.init, interval=self.config.dt*1000)
         
         # Uncomment the line below to save the animation
         ani.save('./out/cart_pole_animation.gif',writer='pillow')
         
         plt.show()
+
+    def plot(self, states, actions):
+        fig, axs = plt.subplots(2)
+        fig.suptitle('Vertically stacked subplots')
+        axs[0].plot(actions, 'r')
+        axs[1].plot(states[:,2]*180/np.pi, 'b')
+        plt.savefig("./out/cart_pole_actions.png")
+        plt.close()
