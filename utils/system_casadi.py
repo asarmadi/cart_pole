@@ -64,8 +64,8 @@ class CartPoleCasadi(BaseSystem):
         ## Box constraints
         lower_bounds = self.unpack_variables_fn(flat=-float('inf'))
         upper_bounds = self.unpack_variables_fn(flat=float('inf'))
-        lower_bounds['inputs'][:,0] = -20.0 # Minimum force
-        upper_bounds['inputs'][:,0] = 20.0 # Maximum force
+        lower_bounds['inputs'][:,0] = -4.0 # Minimum force
+        upper_bounds['inputs'][:,0] = 4.0 # Maximum force
         ## Initial state
         lower_bounds['states'][0, self.index_x]           = x0[self.index_x]
         upper_bounds['states'][0, self.index_x]           = x0[self.index_x]
@@ -109,6 +109,12 @@ class CartPoleCasadi(BaseSystem):
                 ubx=self.pack_variables_fn(**upper_bounds)['flat'])
         results = self.unpack_variables_fn(flat=result['x'])
 
+        #states = np.array(results['states'])
+        #actions = np.array(results['inputs'])
+        #a = np.hstack((states[:self.config.mpc_horizon-1],actions))
+        #print(a.shape)
+        #np.savetxt("./out/out.csv", a, delimiter=",", header='x,x_dot,theta,theta_dot,u')
+#
         #visualize_obj = CartPoleVisualizer(np.array(results['states']), self.config)
         #visualize_obj.plot(np.array(results['states']),np.array(results['inputs']))
         #visualize_obj.gen_animation()

@@ -12,7 +12,7 @@ from tqdm import tqdm
 x0          = np.array([0, 0, 0, 0])  # [x, x_dot, theta, theta_dot]
 xf          = np.array([0, 0, np.pi, 0]) 
 
-states  = []
+states  = [x0]
 actions = []
 config = Config()
 system = CartPoleCasadi(config, xf)
@@ -27,6 +27,11 @@ for t in tqdm(np.arange(0, config.T, config.dt)):
     actions.append(action)
 
 states = np.array(states)
+print(f"States: {states.shape}")
+actions = np.array(actions).reshape(-1,1)
+a = np.hstack((states[:-1,:],actions))
+print(a.shape)
+np.savetxt("./out/out_mpc.csv", a, delimiter=",", header='x,x_dot,theta,theta_dot,u')
 
 visualize_obj = CartPoleVisualizer(states, config)
 visualize_obj.gen_animation()
