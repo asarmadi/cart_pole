@@ -11,6 +11,7 @@ class CartPole:
         self.index_theta     = 2
         self.index_theta_dot = 3
         self.xf              = xf
+        self.init_guess      = 1
 
         ## Problem size
         self.n_states = 4
@@ -107,9 +108,10 @@ class CartPole:
         opts = {'ipopt.print_level':0, 'print_time':False}
         solver = casadi.nlpsol('solver', 'ipopt', {'x':self.variables_flat, 'f':objective, 'g':defect},opts)
         
-        result = solver(x0=1.0, lbg=0.0, ubg=0.0,
+        result = solver(x0=self.init_guess, lbg=0.0, ubg=0.0,
                 lbx=self.pack_variables_fn(**lower_bounds)['flat'],
                 ubx=self.pack_variables_fn(**upper_bounds)['flat'])
+        self.init_guess = result['x']
         results = self.unpack_variables_fn(flat=result['x'])
 
         #states = np.array(results['states'])
