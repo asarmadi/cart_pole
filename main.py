@@ -23,8 +23,6 @@ for t in tqdm(np.arange(0, config.T, config.dt)):
 
 states = np.array(states).squeeze(1)
 actions = np.array(actions).reshape(-1,1)
-a = np.hstack((states[:-1,:],actions))
-np.savetxt("./out/out_mpc.csv", a, delimiter=",", header='x,x_dot,theta,theta_dot,u')
 
 visualize_obj = CartPoleVisualizer(states, config)
 visualize_obj.gen_animation()

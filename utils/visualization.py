@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -17,6 +18,11 @@ class CartPoleVisualizer:
 
         self.history = history
         self.config = config
+
+        self.out_dir = "./out/"  # Path to save output gif and plot
+
+        if not os.path.exists(self.out_dir):
+            os.makedirs(self.out_dir)
     
     # Initialize animation
     def init(self):
@@ -39,7 +45,7 @@ class CartPoleVisualizer:
 
         gif_writer = animation.ImageMagickWriter(fps=20)
         # Uncomment the line below to save the animation
-        ani.save('./out/cart_pole_animation.gif',writer='pillow')
+        ani.save(self.out_dir+'cart_pole_animation.gif',writer='pillow')
         
         plt.show()
 
@@ -48,5 +54,5 @@ class CartPoleVisualizer:
         fig.suptitle('Vertically stacked subplots')
         axs[0].plot(actions, 'r')
         axs[1].plot(states[:,2]*180/np.pi, 'b')
-        plt.savefig("./out/cart_pole_actions.png")
+        plt.savefig(self.out_dir+"cart_pole_actions.png")
         plt.close()

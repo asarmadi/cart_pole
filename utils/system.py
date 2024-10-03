@@ -1,7 +1,5 @@
 import casadi
 from casadi import SX, DM
-from utils.visualization import CartPoleVisualizer
-import numpy as np
 
 class CartPole:
     def __init__(self, config):
@@ -84,9 +82,7 @@ class CartPole:
         upper_bounds['states'][0, self.index_theta]       = x0[0,self.index_theta]
         lower_bounds['states'][0, self.index_theta_dot]   = x0[0,self.index_theta_dot]
         upper_bounds['states'][0, self.index_theta_dot]   = x0[0,self.index_theta_dot]
-        ## Final state
-        
-        #self.states[0,:]=SX(x0)
+
         X0 = self.states[0:self.config.mpc_horizon-1,:]
         X1 = self.states[1:self.config.mpc_horizon,:]
         # RK4
@@ -105,14 +101,5 @@ class CartPole:
         self.init_guess = result['x']
         results = self.unpack_variables_fn(flat=result['x'])
 
-        #states = np.array(results['states'])
-        #actions = np.array(results['inputs'])
-        #a = np.hstack((states[:self.config.mpc_horizon-1],actions))
-        #print(a.shape)
-        #np.savetxt("./out/out.csv", a, delimiter=",", header='x,x_dot,theta,theta_dot,u')
-#
-        #visualize_obj = CartPoleVisualizer(np.array(results['states']), self.config)
-        #visualize_obj.plot(np.array(results['states']),np.array(results['inputs']))
-        #visualize_obj.gen_animation()
         return results['inputs'][0].__float__()
 
