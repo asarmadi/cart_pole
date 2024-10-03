@@ -8,12 +8,11 @@ from tqdm import tqdm
 
 # Initialize state and storage
 x0          = np.array([[0, 0, 0, 0]])  # [x, x_dot, theta, theta_dot]
-xf          = np.array([[0, 0, np.pi, 0]]) 
 
 states  = [x0]
 actions = []
 config = Config()
-system = CartPole(config, xf)
+system = CartPole(config)
 
 # Simulate the dynamics
 for t in tqdm(np.arange(0, config.T, config.dt)):

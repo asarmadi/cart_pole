@@ -4,14 +4,15 @@ from utils.visualization import CartPoleVisualizer
 import numpy as np
 
 class CartPole:
-    def __init__(self, config, xf):
+    def __init__(self, config):
         self.config          = config
         self.index_x         = 0
         self.index_x_dot     = 1
         self.index_theta     = 2
         self.index_theta_dot = 3
-        self.xf              = xf
-        self.init_guess      = 1
+        self.init_guess      = 1    # Initial guess for nlp solver
+        self.u_max           = 20   # Maximum force allowed. Force boundary
+        self.mu_c            = 0.2  # Coefficient of the friction between cart and the track
 
         ## Problem size
         self.n_states = 4
@@ -38,7 +39,7 @@ class CartPole:
         sin_theta = casadi.sin(theta)
         cos_theta = casadi.cos(theta)
 
-        action = u[:, 0]
+        action = u[:, 0] - self.mu_c*x_dot
 
         x_acc = (1/(self.config.m_cart+self.config.m_pole*sin_theta**2))*(action+self.config.m_pole*sin_theta*(self.config.l*theta_dot**2+self.config.g*cos_theta))
         theta_acc = (1/(self.config.l*(self.config.m_cart+self.config.m_pole*sin_theta**2)))*(-action*cos_theta-self.config.m_pole*self.config.l*theta_dot**2*cos_theta*sin_theta-(self.config.m_cart+self.config.m_pole)*self.config.g*sin_theta)
@@ -72,8 +73,8 @@ class CartPole:
         ## Box constraints
         lower_bounds = self.unpack_variables_fn(flat=-float('inf'))
         upper_bounds = self.unpack_variables_fn(flat=float('inf'))
-        #lower_bounds['inputs'][:,0] = -40.0 # Minimum force
-        #upper_bounds['inputs'][:,0] = 40.0 # Maximum force
+        lower_bounds['inputs'][:,0] = -self.u_max # Minimum force
+        upper_bounds['inputs'][:,0] = self.u_max # Maximum force
         ## Initial state
         lower_bounds['states'][0, self.index_x]           = x0[0,self.index_x]
         upper_bounds['states'][0, self.index_x]           = x0[0,self.index_x]
@@ -84,14 +85,6 @@ class CartPole:
         lower_bounds['states'][0, self.index_theta_dot]   = x0[0,self.index_theta_dot]
         upper_bounds['states'][0, self.index_theta_dot]   = x0[0,self.index_theta_dot]
         ## Final state
-        #lower_bounds['states'][-1,self.index_x]           = self.xf[self.index_x]
-        #upper_bounds['states'][-1,self.index_x]           = self.xf[self.index_x]
-        #lower_bounds['states'][-1,self.index_x_dot]       = self.xf[self.index_x_dot]
-        #upper_bounds['states'][-1,self.index_x_dot]       = self.xf[self.index_x_dot]
-        #lower_bounds['states'][-1,self.index_theta]       = self.xf[self.index_theta]
-        #upper_bounds['states'][-1,self.index_theta]       = self.xf[self.index_theta]
-        #lower_bounds['states'][-1,self.index_theta_dot]   = self.xf[self.index_theta_dot]
-        #upper_bounds['states'][-1,self.index_theta_dot]   = self.xf[self.index_theta_dot]
         
         #self.states[0,:]=SX(x0)
         X0 = self.states[0:self.config.mpc_horizon-1,:]
@@ -100,8 +93,6 @@ class CartPole:
         defect = self.step(X0,self.inputs) - X1
         defect = casadi.reshape(defect, -1, 1)
         ## Optimization objective
-        #objective = casadi.sum1(casadi.sum2(self.inputs**2))
-        #objective = casadi.sum1(casadi.sqrt(casadi.sum2((self.states-np.tile(self.xf,(self.config.mpc_horizon,1)))**2)))
         potential_eng, kinetic_eng = self.cal_energy()
         
         objective = casadi.sum1(kinetic_eng-potential_eng)
