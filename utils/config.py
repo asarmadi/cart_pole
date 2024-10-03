@@ -7,5 +7,5 @@ class Config:
         self.l = 1.0  # length of the pole, in meters
         self.J = (self.m_pole * self.l**2) # Moment of inertia
         self.dt = 0.04  # time step, in seconds
-        self.T = 10  # total time, in seconds
-        self.mpc_horizon = 100 # Horizon lenght in time step
+        self.T = 5  # total time, in seconds
+        self.mpc_horizon = 150 # Horizon lenght in time step
