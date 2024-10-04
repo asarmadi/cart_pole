@@ -1,5 +1,5 @@
 # Cart Pole
-This repository contains the code to swing-up and balance a cart pole.
+This repository contains the Model Predicitve Controller (MPC) to swing-up and balance a cart pole. [Casadi](https://web.casadi.org/) is used for solving the nonlinear optimization problem.
 
 ## Modeling
 You can find a detailed modeling of the system in this [PDF](./cart_pole.pdf).
